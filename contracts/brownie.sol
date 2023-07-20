@@ -6,7 +6,6 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "hardhat/console.sol";
-import "https://github.com/UMAprotocol/protocol/blob/7a93650a7494eaee83756382a18ecf11314499cf/packages/core/contracts/optimistic-oracle-v3/interfaces/OptimisticOracleV3Interface.sol";
 
 contract BrowniePoints {
    
@@ -37,16 +36,12 @@ contract BrowniePoints {
     address ERC20Token;
     uint minAmount;
     mapping(address => uint) brownieCounter;
-    address oo;
-    OptimisticOracleV3Interface public immutable oo;
-    uint64 public constant assertionLiveness = 7200;
-    bytes32 public immutable defaultIdentifier;
+
 
     constructor(address _erc20, uint _minAmount, address _oo) {
         token = Token(_erc20);
         minAmount = _minAmount;
-        oo = _oo;
-        defaultIdentifier = oo.defaultIdentifier();
+       
     }
 
     function createOrganisation(string _uri, uint _id, string _ipfs )
@@ -67,39 +62,12 @@ contract BrowniePoints {
     }
 
     function createBrownie(string _intent, string _keyword, uint _x, uint _y) external nonReentrant payable {
-         uint256 bond = oo.getMinimumBond(address(defaultCurrency));
-         defaultCurrency.safeTransferFrom(msg.sender, address(this), bond);
-         //assertionId = oov3.assertTruthWithDefaults(bytes(_intent), address(this));
-         assertionId = oo.assertTruth(
-            bytes(_intent),
-            msg.sender,
-            address(this), // Callback recipient
-            address(0), // No sovereign security.
-            assertionLiveness,
-            token,
-            bond,
-            defaultIdentifier,
-            bytes32(0) // No domain.
-        );
          brownieCounter[msg.sender] = brownieCounter[msg.sender] + 1;
          brownieMaps[msg.sender][brownieCounter[msg.sender]].keyword = _keyword;
          brownieMaps[msg.sender][brownieCounter[msg.sender]].x = _x;
          brownieMaps[msg.sender][brownieCounter[msg.sender]].y = _y;
          brownieMaps[msg.sender][brownieCounter[msg.sender]].intent = _intent;
-    }
-
-    function assertionResolvedCallback(bytes32 assertionId, bool assertedTruthfully) public {
-        require(msg.sender == address(oo));
-        // If the assertion was true, then the data assertion is resolved.
-        if (assertedTruthfully) {
-            assertionsData[assertionId].resolved = true;
-            DataAssertion memory dataAssertion = assertionsData[assertionId];
-            //emit DataAssertionResolved(dataAssertion.dataId, dataAssertion.data, dataAssertion.asserter, assertionId);
-            // Else delete the data assertion if it was false to save gas.
-        } else delete assertionsData[assertionId];
-    }
-   function assertionDisputedCallback(bytes32 assertionId) public {}
-    
+    } 
 
 
 }

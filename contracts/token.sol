@@ -11,6 +11,8 @@ contract Token is ERC20, AccessControl {
     bytes32 public constant MINTER = keccak256("MINTER");
     bytes32 public constant BURNER = keccak256("BURNER");
     uint minimumFaucetAmount;
+    mapping(address => uint) public balances;
+
 
 
     constructor(string memory _name, string memory _symbol, uint _minimumFaucetAmount) ERC20(_name, _symbol){
@@ -23,16 +25,14 @@ contract Token is ERC20, AccessControl {
     
     function mint(address _to, uint _value) onlyRole(MINTER) public {
         _mint(_to, _value);
-    }
-    function faucet(address _to, uint _value) public {
-        require(minimumFaucetAmount >= _value);
-        _mint(_to, _value);
-    }
-    function approveContract(address contractAddress) public {
-        _approve(address(this), contractAddress, 100000000000); 
+        balances[_to] = balances[_to] + _value;
     }
     function burn(address _from, uint _value) onlyRole(BURNER) public {
         _burn(_from, _value);
     } 
+    function violateIntent(address _to) onlyRole(ADMIN) public {
+        balances[_to] = 0;
+    }
+    
     
 }
