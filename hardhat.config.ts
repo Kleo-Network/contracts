@@ -12,7 +12,7 @@ require("dotenv").config();
 
 const TESTNET_PRIVATE_KEY = process.env.TESTNET_PRIVATE_KEY;
 const POLYGON_SCAN_API_KEY = process.env.POLYGON_SCAN_API_KEY;
-
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
 
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
